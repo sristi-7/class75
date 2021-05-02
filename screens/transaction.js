@@ -2,6 +2,8 @@ import * as React from 'react';
 import {View, Text,StyleSheet,TouchableOpacity,TextInput} from 'react-native';
 import * as Permissions from "expo-permissions"
 import {BarCodeScanner} from "expo-barcode-scanner"
+import * as firebase from "firebase"
+import db from '../config';
 
 export default class TransactionScreen extends React.Component {
     constructor(){
@@ -41,6 +43,10 @@ export default class TransactionScreen extends React.Component {
         }
         
     }
+    handleTransactions=()=>{
+        db.collection("Books").doc("bsc001").get().then(
+            (doc)=>{console.log(doc.data())}
+        )    }
     render(){
         if(this.state.buttonState!=="normal" && this.state.hasCameraPermission){
             return (
@@ -56,15 +62,15 @@ export default class TransactionScreen extends React.Component {
         return (
 
             <View style={styles.container}>
-                <View>
-                    <TextInput placeholder="bookID" value={this.state.scannedBookID}/>
-                    <TouchableOpacity onPress={()=>{this.getCameraPermissions("bookID")}}>
+                <View style={{flexDirection:"row"}}>
+                    <TextInput style={styles.textInput} placeholder="bookID" value={this.state.scannedBookID}/>
+                    <TouchableOpacity style={styles.button} onPress={()=>{this.getCameraPermissions("bookID")}}>
                     <Text>scan</Text>
                 </TouchableOpacity>
                 </View>
-                <View>
-                    <TextInput placeholder="studentID" value={this.state.scannedStudentID}/>
-                    <TouchableOpacity onPress={()=>{this.getCameraPermissions("studentID")}}>
+                <View style={{flexDirection:"row"}}>
+                    <TextInput style={styles.textInput} placeholder="studentID" value={this.state.scannedStudentID}/>
+                    <TouchableOpacity style={styles.button} onPress={()=>{this.getCameraPermissions("studentID")}}>
                     <Text>scan</Text>
                 </TouchableOpacity>
                 </View>
@@ -72,7 +78,11 @@ export default class TransactionScreen extends React.Component {
                     this.state.scannedData
                 ):("requestCameraPosition")}</Text>
                 <Text>TransactionScreen</Text>
-                
+                <TouchableOpacity style={styles.button} 
+                onPress={()=>{this.handleTransactions()
+                }}>
+                    <Text>submit</Text>
+                </TouchableOpacity>
             </View>
         )}
     }
@@ -83,6 +93,24 @@ const styles= StyleSheet.create(
             alignItems:'center',
             marginTop:100,
 
+        },
+        textInput:{
+            borderWidth:0.5,
+            padding:10,
+            fontSize:15,
+            width:"50%", marginTop:10,marginRight:5,
+            //fontFamily:
+        }, button:{
+            backgroundColor:"yellow",
+            borderRadius:5,
+            padding:10,
+            width:"20%", marginTop:10,marginRight:5,
+            alignItems: "center",
+            justifyContent: "center",
+
+
+
         }
+
     }
 ) 
