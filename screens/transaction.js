@@ -8,6 +8,7 @@ import {
   TextInput,
   ToastAndroid,
   KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 import * as Permissions from "expo-permissions";
 import { BarCodeScanner } from "expo-barcode-scanner";
@@ -73,7 +74,7 @@ export default class TransactionScreen extends React.Component {
   checkBookAvailability = async () => {
     const bookRef = await db
       .collection("Books")
-      .where("bookId", "==", this.state.scannedBookID)
+      .where("BookID", "==", this.state.scannedBookID)
       .get();
     var transactionType = "";
     if (bookRef.docs.length == 0) {
@@ -87,14 +88,15 @@ export default class TransactionScreen extends React.Component {
           transactionType = "return";
         }
       });
+      Alert.alert(transactionType)
     }
 
     return transactionType;
   };
   initiateBookReturn = async () => {
     db.collection("Transactions").add({
-      studentId: this.state.scannedStudentID,
-      bookId: this.state.scannedBookID,
+      StudentID: this.state.scannedStudentID,
+      BookID: this.state.scannedBookID,
       date: firebase.firestore.Timestamp.now().toDate(),
       transactionType: "return",
     });
@@ -142,7 +144,25 @@ export default class TransactionScreen extends React.Component {
     }
   };
   checkStudentEligibilityForBookReturned= async()=>{
-      //check if the students book availabilty is false 
+    const studentRef = await db
+    .collection("Transactions")
+      .where("BookID", "==", this.state.scannedBookID).limit(1)
+      .get();
+    var isStudentEligible=""
+    studentRef.docs.map(doc=>{
+      var lastBookTransaction=doc.data() 
+    if(lastBookTransaction.StudentID===this.state.scannedStudentID){
+      isStudentEligible=true
+    }else{
+      isStudentEligible=false
+      ToastAndroid.show("this book wasn't issued by the student", ToastAndroid.LONG);
+      this.setState({
+        scannedBookID: "",
+        scannedStudentID: "",
+      });
+    }
+    })
+     return isStudentEligible 
   }
   handleTransactions = async () => {
     var transactionType = await this.checkBookAvailability();
