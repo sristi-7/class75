@@ -52,9 +52,9 @@ export default class TransactionScreen extends React.Component {
   };
   initiateBookIssue = async () => {
     db.collection("Transactions").add({
-      studentId: this.state.scannedStudentID,
-      bookId: this.state.scannedBookID,
-      date: firebase.firestore.Timestamp.now().toDate(),
+      StudentID: this.state.scannedStudentID,
+      BookID: this.state.scannedBookID,
+      Date: firebase.firestore.Timestamp.now().toDate(),
       transactionType: "issued",
     });
     db.collection("Books").doc(this.state.scannedBookID).update({
@@ -88,7 +88,7 @@ export default class TransactionScreen extends React.Component {
           transactionType = "return";
         }
       });
-      Alert.alert(transactionType)
+      
     }
 
     return transactionType;
@@ -97,7 +97,7 @@ export default class TransactionScreen extends React.Component {
     db.collection("Transactions").add({
       StudentID: this.state.scannedStudentID,
       BookID: this.state.scannedBookID,
-      date: firebase.firestore.Timestamp.now().toDate(),
+      Date: firebase.firestore.Timestamp.now().toDate(),
       transactionType: "return",
     });
     db.collection("Books").doc(this.state.scannedBookID).update({
@@ -117,7 +117,7 @@ export default class TransactionScreen extends React.Component {
   checkStudentEligibilityForBookIssue = async () => {
     const studentRef = await db
       .collection("Students")
-      .where("studentId", "==", this.state.scannedStudentID)
+      .where("StudentID", "==", this.state.scannedStudentID)
       .get();
     var isStudentEligible = "";
     if (studentRef.docs.length == 0) {
@@ -130,7 +130,7 @@ export default class TransactionScreen extends React.Component {
     } else {
       studentRef.docs.map((doc) => {
         var student = doc.data();
-        if (student.NoOfBooksIssued > 2) {
+        if (student.NoOfBooksIssued < 2) {
           isStudentEligible = true;
         } else {
           ToastAndroid.show("already issued a book", ToastAndroid.LONG);
@@ -142,6 +142,7 @@ export default class TransactionScreen extends React.Component {
         }
       });
     }
+    return isStudentEligible
   };
   checkStudentEligibilityForBookReturned= async()=>{
     const studentRef = await db
@@ -150,6 +151,7 @@ export default class TransactionScreen extends React.Component {
       .get();
     var isStudentEligible=""
     studentRef.docs.map(doc=>{
+      
       var lastBookTransaction=doc.data() 
     if(lastBookTransaction.StudentID===this.state.scannedStudentID){
       isStudentEligible=true
